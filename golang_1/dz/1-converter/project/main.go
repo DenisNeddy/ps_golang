@@ -7,32 +7,39 @@ import (
 )
 
 func main() {
+	var currentCurrency string
+	var quantity float64
+	var targetCurrency string
 
 	for {
 		fmt.Print("1. Ввод исходной валюты(USD,RUB,EUR): ")
-		currentCurrency, err := getCurrencyInput()
-		if err != nil {
+		result, err := getCurrencyInput()
 
+		if err != nil {
 			fmt.Println("Не корректный тип Валюты")
 			fmt.Println("Попробуйте ввести заново!")
 			continue
 		}
+		currentCurrency = result
+		break
+	}
 
-		quantity, err := getQuantity()
+	for {
+		fmt.Print("2. Ввод числа: ")
 
+		result, err := getQuantity()
 		if err != nil {
 			fmt.Println("--------------------")
 			fmt.Println("Введите правильный тип значения количества средств")
 			fmt.Println("Попробуйте еще раз!")
 			fmt.Println("--------------------")
-
-			isRepeat := checkRepeatCalc()
-			if isRepeat {
-				break
-			}
 			continue
 		}
+		quantity = result
+		break
+	}
 
+	for {
 		switch {
 		case currentCurrency == "RUB":
 			fmt.Print("3. Ввод целевой валюты(USD,EUR): ")
@@ -42,18 +49,13 @@ func main() {
 			fmt.Print("3. Ввод целевой валюты(RUB,EUR): ")
 		}
 
-		targetCurrency, err := getCurrencyInput()
+		result, err := getCurrencyInput()
 
-		if targetCurrency == currentCurrency {
+		if result == currentCurrency {
 			fmt.Println("--------------------")
 			fmt.Println("Желаемая валюта не должна совподать с текущей")
 			fmt.Println("Попробуйте еще раз!")
 			fmt.Println("--------------------")
-
-			isRepeat := checkRepeatCalc()
-			if isRepeat {
-				break
-			}
 			continue
 		}
 
@@ -62,19 +64,16 @@ func main() {
 			fmt.Println("Не корректный тип Валюты")
 			fmt.Println("Попробуйте еще раз!")
 			fmt.Println("--------------------")
-
-			isRepeat := checkRepeatCalc()
-			if isRepeat {
-				break
-			}
 			continue
 		}
 
-		// result := fmt.Sprint(calcCurrency(currentCurrency, quantity, targetCurrency))
-		fmt.Printf("Результат конвертации: %.2f", calcCurrency(currentCurrency, quantity, targetCurrency))
-		fmt.Print(" ", targetCurrency)
+		targetCurrency = result
 		break
 	}
+
+	fmt.Printf("Результат конвертации: %.2f", calcCurrency(currentCurrency, quantity, targetCurrency))
+	fmt.Print(" ", targetCurrency)
+
 }
 
 func getCurrencyInput() (string, error) {
@@ -91,7 +90,7 @@ func getCurrencyInput() (string, error) {
 func getQuantity() (float64, error) {
 
 	var quantity string
-	fmt.Print("2. Ввод числа: ")
+
 	fmt.Scan(&quantity)
 	money, err := strconv.ParseFloat(quantity, 64)
 	if err != nil {
@@ -106,43 +105,36 @@ func calcCurrency(currentCurrency string, quantity float64, targetCurrency strin
 	const EURInRUB float64 = USDInRUB / USDInEUR
 	var result float64
 
-	if currentCurrency == "RUB" {
-		if targetCurrency == "EUR" {
+	switch currentCurrency {
+	case "RUB":
+		switch targetCurrency {
+		case "EUR":
 			result = quantity / EURInRUB
-		}
-		if targetCurrency == "USD" {
+		case "USD":
 			result = quantity / USDInRUB
 		}
-	}
 
-	if currentCurrency == "USD" {
-		if targetCurrency == "RUB" {
+	case "USD":
+		switch targetCurrency {
+		case "RUB":
 			result = USDInRUB * quantity
-		}
-		if targetCurrency == "EUR" {
+		case "EUR":
 			result = USDInEUR * quantity
 		}
-	}
-
-	if currentCurrency == "EUR" {
+	case "EUR":
 		if targetCurrency == "RUB" {
 			result = EURInRUB * quantity
 		}
 		if targetCurrency == "USD" {
 			result = quantity / USDInEUR
 		}
+		switch targetCurrency {
+		case "RUB":
+			result = EURInRUB * quantity
+		case "USD":
+			result = quantity / USDInEUR
+		}
 	}
 
 	return result
-}
-
-func checkRepeatCalc() bool {
-	var userChoise string
-	fmt.Print("Вы хотите выйти? (y/n): ")
-	fmt.Scan(&userChoise)
-
-	if userChoise == "y" || userChoise == "Y" {
-		return true
-	}
-	return false
 }
