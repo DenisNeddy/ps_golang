@@ -77,7 +77,7 @@ func main() {
 		break
 	}
 
-	fmt.Printf("Результат конвертации: %.2f", calcCurrency(currentCurrency, quantity, targetCurrency, rates))
+	fmt.Printf("Результат конвертации: %.2f", calcCurrency(currentCurrency, quantity, targetCurrency, &rates))
 	fmt.Print(" ", targetCurrency)
 
 }
@@ -105,9 +105,9 @@ func getQuantity() (float64, error) {
 	return money, nil
 }
 
-func calcCurrency(currentCurrency string, quantity float64, targetCurrency string, rates map[string]float64) float64 {
+func calcCurrency(currentCurrency string, quantity float64, targetCurrency string, rates *map[string]float64) float64 {
 
-	rub := quantity * rates[currentCurrency]
-	return rub / rates[targetCurrency]
+	rub := quantity * (*rates)[currentCurrency]
+	return rub / (*rates)[targetCurrency]
 
 }
