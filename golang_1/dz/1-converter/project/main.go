@@ -100,41 +100,14 @@ func getQuantity() (float64, error) {
 }
 
 func calcCurrency(currentCurrency string, quantity float64, targetCurrency string) float64 {
-	const USDInEUR float64 = 0.94
-	const USDInRUB float64 = 78
-	const EURInRUB float64 = USDInRUB / USDInEUR
-	var result float64
 
-	switch currentCurrency {
-	case "RUB":
-		switch targetCurrency {
-		case "EUR":
-			result = quantity / EURInRUB
-		case "USD":
-			result = quantity / USDInRUB
-		}
-
-	case "USD":
-		switch targetCurrency {
-		case "RUB":
-			result = USDInRUB * quantity
-		case "EUR":
-			result = USDInEUR * quantity
-		}
-	case "EUR":
-		if targetCurrency == "RUB" {
-			result = EURInRUB * quantity
-		}
-		if targetCurrency == "USD" {
-			result = quantity / USDInEUR
-		}
-		switch targetCurrency {
-		case "RUB":
-			result = EURInRUB * quantity
-		case "USD":
-			result = quantity / USDInEUR
-		}
+	rates := map[string]float64{
+		"USD": 78.0,
+		"RUB": 1.0,
+		"EUR": 91.0,
 	}
 
-	return result
+	rub := quantity * rates[currentCurrency]
+	return rub / rates[targetCurrency]
+
 }
