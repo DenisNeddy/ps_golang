@@ -11,6 +11,12 @@ func main() {
 	var quantity float64
 	var targetCurrency string
 
+	rates := map[string]float64{
+		"USD": 78.0,
+		"RUB": 1.0,
+		"EUR": 91.0,
+	}
+
 	for {
 		fmt.Print("1. Ввод исходной валюты(USD,RUB,EUR): ")
 		result, err := getCurrencyInput()
@@ -71,7 +77,7 @@ func main() {
 		break
 	}
 
-	fmt.Printf("Результат конвертации: %.2f", calcCurrency(currentCurrency, quantity, targetCurrency))
+	fmt.Printf("Результат конвертации: %.2f", calcCurrency(currentCurrency, quantity, targetCurrency, &rates))
 	fmt.Print(" ", targetCurrency)
 
 }
@@ -99,42 +105,9 @@ func getQuantity() (float64, error) {
 	return money, nil
 }
 
-func calcCurrency(currentCurrency string, quantity float64, targetCurrency string) float64 {
-	const USDInEUR float64 = 0.94
-	const USDInRUB float64 = 78
-	const EURInRUB float64 = USDInRUB / USDInEUR
-	var result float64
+func calcCurrency(currentCurrency string, quantity float64, targetCurrency string, rates *map[string]float64) float64 {
 
-	switch currentCurrency {
-	case "RUB":
-		switch targetCurrency {
-		case "EUR":
-			result = quantity / EURInRUB
-		case "USD":
-			result = quantity / USDInRUB
-		}
+	rub := quantity * (*rates)[currentCurrency]
+	return rub / (*rates)[targetCurrency]
 
-	case "USD":
-		switch targetCurrency {
-		case "RUB":
-			result = USDInRUB * quantity
-		case "EUR":
-			result = USDInEUR * quantity
-		}
-	case "EUR":
-		if targetCurrency == "RUB" {
-			result = EURInRUB * quantity
-		}
-		if targetCurrency == "USD" {
-			result = quantity / USDInEUR
-		}
-		switch targetCurrency {
-		case "RUB":
-			result = EURInRUB * quantity
-		case "USD":
-			result = quantity / USDInEUR
-		}
-	}
-
-	return result
 }
