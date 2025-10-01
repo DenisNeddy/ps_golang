@@ -7,8 +7,12 @@ import (
 	"project/download-json/bins"
 )
 
+type Db interface {
+	Load(string) error
+}
+
 type Storage struct {
-	Bins bins.BinList `json: "bin"`
+	Bins bins.BinList `json:"bins"`
 }
 
 func NewStorage(bins []bins.Bin) *Storage {
