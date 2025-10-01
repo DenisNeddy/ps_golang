@@ -7,8 +7,9 @@ import (
 	"project/download-json/bins"
 )
 
-type Db interface {
-	Load(string) error
+type DataStorage interface {
+	Save(path string) error
+	Load(path string) error
 }
 
 type Storage struct {
