@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+var funcList = map[string]func([]int) float64{
+	"SUM": getSum,
+	"AVG": getAverage,
+	"MED": getMedian,
+}
+
 func main() {
 	var operationStatus string
 	var numbers = []int{}
@@ -42,14 +48,9 @@ func main() {
 
 		fmt.Println("Введенные вами числа", numbers)
 
-		switch operationStatus {
-		case "SUM":
-			fmt.Println("Результат суммирования: ", getSum(numbers))
-		case "AVG":
-			fmt.Println("Результат вычисления среднего значения: ", getAverage(numbers))
-		case "MED":
-			fmt.Println("Результат вычисления медианы: ", getMedian(numbers))
-		}
+		handlerItems := funcList[operationStatus]
+
+		fmt.Println(handlerItems(numbers))
 
 		var answer string
 		fmt.Print("Хотите продолжить? (y/n): ")
@@ -96,13 +97,13 @@ func getNumbers() ([]int, error) {
 
 }
 
-func getSum(numbers []int) int {
+func getSum(numbers []int) float64 {
 	var total int
 	for _, value := range numbers {
 		total += value
 	}
 
-	return total
+	return float64(total)
 }
 
 func getAverage(numbers []int) float64 {
