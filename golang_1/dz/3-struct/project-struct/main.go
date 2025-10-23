@@ -71,7 +71,8 @@ func main() {
 	case "get":
 		str, _ := api.GetBin(*id)
 		fmt.Println(str.Bins)
-
+	case "update":
+		api.ChangeBin(*id)
 	case "delete":
 		api.DeleteBin(*id)
 

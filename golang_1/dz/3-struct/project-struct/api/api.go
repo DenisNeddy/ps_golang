@@ -242,47 +242,6 @@ func GetBin(id string) (*storage.Storage, error) {
 	return store, nil
 }
 
-func GetBin2(id string) error {
-	if id == "" {
-		return errors.New("ошибка: название id не может быть пустым")
-	}
-
-	// Получение ключа
-	key, err := GetKey()
-
-	if err != nil {
-		return err
-	}
-
-	// id 68f7aa52d0ea881f40b1239b
-
-	req, err := http.NewRequest("GET", "https://api.jsonbin.io/v3/b/"+id, nil)
-
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("X-Master-Key", key)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(body))
-	return nil
-}
-
 func DeleteBin(id string) error {
 	if id == "" {
 		return errors.New("ошибка: название id не может быть пустым")
@@ -376,6 +335,49 @@ func removeElem(slice [][2]string, target string) [][2]string {
 	return slice
 }
 
-func getChange() {
+func ChangeBin(id string) (*storage.Storage, error) {
+	if id == "" {
+		return nil, errors.New("ошибка: название id не может быть пустым")
+	}
 
+	// Получение ключа
+	key, err := GetKey()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// id 68f7aa52d0ea881f40b1239b
+
+	req, err := http.NewRequest("PUT", "https://api.jsonbin.io/v3/b/"+id, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("X-Master-Key", key)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var store *storage.Storage
+	json.Unmarshal(body, &store)
+	err = store.Save("data.json")
+	if err != nil {
+		return nil, err
+	}
+
+	return store, nil
 }
