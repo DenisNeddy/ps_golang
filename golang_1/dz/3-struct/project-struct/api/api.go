@@ -214,7 +214,7 @@ func GetBin(id string) (*storage.Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Master-Key", key)
 
 	client := &http.Client{}
@@ -261,7 +261,7 @@ func DeleteBin(id string) error {
 	if err != nil {
 		return err
 	}
-
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Master-Key", key)
 
 	client := &http.Client{}
@@ -335,7 +335,7 @@ func removeElem(slice [][2]string, target string) [][2]string {
 	return slice
 }
 
-func ChangeBin(id string) (*storage.Storage, error) {
+func ChangeBin(file string, id string) (*storage.Storage, error) {
 	if id == "" {
 		return nil, errors.New("ошибка: название id не может быть пустым")
 	}
@@ -347,14 +347,18 @@ func ChangeBin(id string) (*storage.Storage, error) {
 		return nil, err
 	}
 
-	// id 68f7aa52d0ea881f40b1239b
-
-	req, err := http.NewRequest("PUT", "https://api.jsonbin.io/v3/b/"+id, nil)
-
+	// id 68f7aa52d0ea881f40b1239b\
+	fileContent, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
 
+	req, err := http.NewRequest("PUT", "https://api.jsonbin.io/v3/b/"+id, bytes.NewBuffer(fileContent))
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Master-Key", key)
 
 	client := &http.Client{}

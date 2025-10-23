@@ -72,7 +72,7 @@ func main() {
 		str, _ := api.GetBin(*id)
 		fmt.Println(str.Bins)
 	case "update":
-		api.ChangeBin(*id)
+		api.ChangeBin(*fileBin, *id)
 	case "delete":
 		api.DeleteBin(*id)
 
