@@ -15,6 +15,7 @@ type DataStorage interface {
 type Storage struct {
 	Bins bins.BinList `json:"bins"`
 	List [][2]string  `json:"list"`
+	P    int          `json:"p"`
 }
 
 func NewStorage(bins []bins.Bin) *Storage {

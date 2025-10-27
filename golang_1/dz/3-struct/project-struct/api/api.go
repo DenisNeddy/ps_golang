@@ -16,7 +16,8 @@ import (
 )
 
 type Store struct {
-	Record storage.Storage
+	Record  bins.BinList `json:"record"`
+	Storage storage.Storage
 }
 
 // POST - Создание bin
@@ -195,7 +196,7 @@ func GetKey() (string, error) {
 	return key, nil
 }
 
-func GetBin(id string) (*storage.Storage, error) {
+func GetBin(id string) (*Store, error) {
 	if id == "" {
 		return nil, errors.New("ошибка: название id не может быть пустым")
 	}
@@ -232,20 +233,26 @@ func GetBin(id string) (*storage.Storage, error) {
 		return nil, err
 	}
 
-	var store *storage.Storage
+	var store Store
 	json.Unmarshal(body, &store)
-	err = store.Save("data.json")
+	// err = store.Storage.Save("data.json")
 	if err != nil {
 		return nil, err
 	}
 
-	return store, nil
+	return &store, nil
 }
 
 func DeleteBin(id string) error {
 	if id == "" {
 		return errors.New("ошибка: название id не может быть пустым")
 	}
+
+	deletedStorage, err := GetBin(id)
+
+	// if err != nil {
+	// 	return err
+	// }
 
 	// Получение ключа
 	key, err := GetKey()
@@ -255,6 +262,8 @@ func DeleteBin(id string) error {
 	}
 
 	// id 68f7aa52d0ea881f40b1239b
+
+	// postBody, _ := json.Marshal(result)
 
 	req, err := http.NewRequest("DELETE", "https://api.jsonbin.io/v3/b/"+id, nil)
 
@@ -274,13 +283,16 @@ func DeleteBin(id string) error {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
+	str := string(body)
+	fmt.Print(str)
 
 	if err != nil {
 		return err
 	}
 	var newStorage storage.Storage
 	var localStorage *storage.Storage
-	var deletedStorage *storage.Storage
+
+	// var deletedStorage *storage.Storage
 	// var newBins bins.BinList
 	// var newList [][2]string
 
@@ -293,19 +305,20 @@ func DeleteBin(id string) error {
 		return err
 	}
 
-	err = json.Unmarshal(body, &deletedStorage)
-	if err != nil {
-		return err
-	}
+	// err = json.Unmarshal(postBody, &deletedStorage)
+	// if err != nil {
+	// 	return err
+	// }
 
-	deletedIds := make([]string, 0, len(deletedStorage.Bins))
-	for _, v := range deletedStorage.Bins {
+	deletedIds := make([]string, 0, len(deletedStorage.Record))
+	for _, v := range deletedStorage.Record {
 		deletedIds = append(deletedIds, v.Id)
 	}
 
 	for _, id := range deletedIds {
-		newStorage.Bins = bins.BinList{{Id: "fdfdfd"}}
+		newStorage.Bins = removeBins(localStorage.Bins, id)
 		newStorage.List = removeElem(localStorage.List, id)
+		newStorage.P++
 	}
 
 	err = newStorage.Save("data.json")

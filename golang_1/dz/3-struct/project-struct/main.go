@@ -63,6 +63,8 @@ func main() {
 		fmt.Printf("Ошибка загрузки: %v\n", err)
 		return
 	}
+	// api.GetBin("68fa4c66ae596e708f26ad6c")
+	api.DeleteBin("68fb629fae596e708f28ce24")
 
 	switch *action {
 	case "create":
@@ -70,7 +72,7 @@ func main() {
 
 	case "get":
 		str, _ := api.GetBin(*id)
-		fmt.Println(str.Bins)
+		fmt.Println(str.Storage.Bins)
 	case "update":
 		api.ChangeBin(*fileBin, *id)
 	case "delete":

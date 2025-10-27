@@ -1,1 +1,21 @@
-{"bins":null,"list":null}
+{
+  "bins": [
+    {
+      "id": "98ee6827-ed55-4c5b-943e-3dc64f7fb23c",
+      "private": false,
+      "createdAt": "2025-10-24T14:27:35.6067895+03:00",
+      "name": "fist_2"
+    },
+    {
+      "id": "ebe4f91a-56b7-4bd6-981c-8ac9ea0741a4",
+      "private": false,
+      "createdAt": "2025-10-24T14:27:53.4361322+03:00",
+      "name": "fist_3"
+    }
+  ],
+  "list": [
+    ["98ee6827-ed55-4c5b-943e-3dc64f7fb23c", "fist_2"],
+    ["ebe4f91a-56b7-4bd6-981c-8ac9ea0741a4", "fist_3"]
+  ],
+  "p": 1
+}
