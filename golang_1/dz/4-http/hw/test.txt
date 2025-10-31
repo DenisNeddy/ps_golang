@@ -1,0 +1,163 @@
+var errInvalidFormat = errors.New("invalid phone format")
+var testCases = []struct {
+  name string
+  input string
+  want bool
+  wantErr error
+}{
+  {
+    name: "Правильный кейс",
+    input: "+1234567890",
+    want: true,
+    wantErr: nil,
+  },
+  {
+    name: "Без +",
+    input: "1234567890",
+    want: false,
+    wantErr: errInvalidFormat,
+  }
+}
+
+func TestValidatePhone(t *testing.T) {
+   for _, tc := range testCases {
+     t.Run(
+       tc.name, func(t *testing.T) {
+         got, err := validatePhone(tc.input)
+         if got != tc.want {
+           t.Errorf("Ожидалось %v, получение %v", tc.want, got)
+         }
+         if !errors.Is(err,tc.wantErr) {
+            t.Errorf("Ожидалось %v, получение %v", tc.wantErr, err)
+         }
+       }
+     )
+   }
+}
+
+func validatePhone(phone string) (bool, error) {
+	// Ваш код здесь
+  if phone == ""{
+    return false, errInvalidFormat
+  }
+   
+
+  pattern := `^\+[0-9]{10,15}$`
+  matched, err := regexp.MatchString(pattern, phone)
+  if err != nil {
+    return false, errInvalidFormat
+  }
+  if matched {
+    return true, nil
+  } else {
+    return false, errInvalidFormat
+  }
+  
+	
+}
+
+func main() {
+	result, err := validatePhone("+1234567890")
+	fmt.Println(result, err)
+}
+
+
+
+package main
+
+import (
+	"testing"
+    "errors"
+    "regexp"
+)
+
+// **Описание**: Реализуйте программу для проверки валидности
+// IP-адреса и создайте для неё table-driven тесты.
+//
+// **Входные данные**: строка с IP-адресом (string)
+//
+// **Выходные данные**: булево значение (bool) и ошибка (error)
+//
+// **Ограничения**: IP-адрес должен состоять из 4 чисел от 0 до 255,
+// разделённых точками
+//
+// **Примеры**:
+// Input: ip = "192.168.1.1"
+// Output: valid = true, error = nil
+//
+// Input: ip = "256.1.1.1"
+// Output: valid = false, error = "invalid IP format"
+
+var ErrInvalidIP = errors.New("invalid IP format")
+
+func validateIP(ip string) (bool, error) {
+    pattern := `^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`
+	// Ваш код здесь
+    matched, err := regexp.MatchString(pattern, ip)
+    if err != nil {
+      return false, err
+    }
+    if matched {
+      return true, nil
+    } 
+	return false, ErrInvalidIP
+}
+
+func TestValidateIP(t *testing.T) {
+	testCases := []struct {
+		name     string
+		ip       string
+		expected bool
+		expectedError error
+	}{
+		{
+          name: "Валидный IP",
+          ip: "192.168.1.1",
+          expected: true,
+          expectedError: nil,
+        },
+        {
+          name: "Не валидный IP",
+          ip: "256.1.1.1",
+          expected: false,
+          expectedError: ErrInvalidIP,
+        },
+         {
+          name: "Пустая строка",
+          ip: "",
+          expected: false,
+          expectedError: ErrInvalidIP,
+        },
+       {
+          name: "Числа вне диапазона",
+          ip: "257.1.1.1",
+          expected: false,
+          expectedError: ErrInvalidIP,
+        },
+        {
+          name: "Больше секций",
+          ip: "257.1.1.1.2",
+          expected: false,
+          expectedError: ErrInvalidIP,
+        },
+        {
+          name: "не число",
+          ip: "257.1.1.й",
+          expected: false,
+          expectedError: ErrInvalidIP,
+        },
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Arrange, Act, Assert
+            got, err := validateIP(tc.ip)
+            if got != tc.expected {
+              t.Errorf("Ожидалось %v, получение %v", tc.expected, got)
+            }
+            if !errors.Is(err, tc.expectedError) {
+              t.Errorf("Ожидалось %v, получение %v", tc.expectedError, err)
+            }
+		})
+	}
+}

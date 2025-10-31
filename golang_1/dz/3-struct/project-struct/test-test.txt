@@ -1,0 +1,242 @@
+План реализации тестов для CLI приложения
+📋 Общая структура тестового файла
+Файл: golang_1/dz/3-struct/project-struct/api/api_test.go
+
+Подготовительные шаги (для всех тестов):
+Импорты:
+
+package api_test
+
+import (
+    "testing"
+    "project/download-json/api"
+    "project/download-json/storage"
+    "project/download-json/bins"
+    "os"
+    "github.com/joho/godotenv"
+)
+
+Функция setup (инициализация перед тестами):
+
+Загрузить переменные окружения из .env файла
+Создать тестовый файл для хранения данных (например, test_data.json)
+Инициализировать пустой Storage
+Функция teardown (очистка после тестов):
+
+Удалить тестовый файл test_data.json
+Удалить созданные bin на сервере jsonbin.io через API
+🧪 Тест 1: Создание bin (TestCreateBin)
+Цель: Проверить, что функция CreateBin корректно создает новый bin на сервере и локально
+
+Шаги реализации:
+Arrange (Подготовка):
+
+Создать пустой Storage: store := storage.NewStorage([]bins.Bin{})
+Определить тестовые данные:
+go
+testName := "test_bin_create"
+testPrivate := false
+Сохранить начальное количество bins в Storage
+Act (Действие):
+
+Вызвать функцию создания:
+go
+err := api.CreateBin2(store, "test_data.json", testPrivate, testName)
+Assert (Проверка):
+
+Проверить, что ошибки нет: if err != nil { t.Errorf(...) }
+Проверить, что количество bins увеличилось на 1
+Проверить, что последний добавленный bin имеет правильное имя
+Проверить, что bin сохранился в файл test_data.json
+Проверить, что у bin есть валидный UUID
+Cleanup (Очистка):
+
+Сохранить ID созданного bin для последующего удаления
+После всех тестов удалить bin через api.DeleteBin(binId)
+Дополнительные проверки:
+Тест на создание bin с пустым именем (должна вернуться ошибка)
+Тест на создание приватного bin (private = true)
+🧪 Тест 2: Получение bin (TestGetBin)
+Цель: Проверить, что функция GetBin корректно получает данные bin с сервера
+
+Шаги реализации:
+Arrange (Подготовка):
+
+Создать тестовый bin через CreateBin2
+Сохранить ID созданного bin: createdBinId := store.Bins[0].Id
+Определить ожидаемые данные (имя, приватность)
+Act (Действие):
+
+Вызвать функцию получения:
+go
+result, err := api.GetBin(createdBinId)
+Assert (Проверка):
+
+Проверить, что ошибки нет
+Проверить, что result не nil
+Проверить, что result.Storage.Bins содержит данные
+Проверить, что полученное имя совпадает с созданным
+Проверить, что структура данных корректна (есть поля Record, Storage)
+Cleanup:
+
+Удалить созданный bin через DeleteBin
+Дополнительные проверки:
+Тест на получение несуществующего bin (передать невалидный ID)
+Тест на получение bin с пустым ID (должна вернуться ошибка)
+🧪 Тест 3: Обновление bin (TestChangeBin)
+Цель: Проверить, что функция ChangeBin корректно обновляет данные bin на сервере
+
+Шаги реализации:
+Arrange (Подготовка):
+
+Создать тестовый bin через CreateBin2
+Сохранить ID: binId := store.Bins[0].Id
+Создать файл с обновленными данными:
+go
+updatedStore := storage.NewStorage([]bins.Bin{
+    *bins.NewBin(binId, true, "updated_name"),
+})
+updatedStore.Save("test_update.json")
+Act (Действие):
+
+Вызвать функцию обновления:
+go
+result, err := api.ChangeBin("test_update.json", binId)
+Assert (Проверка):
+
+Проверить, что ошибки нет
+Проверить, что result не nil
+Получить обновленный bin через GetBin(binId)
+Проверить, что имя изменилось на "updated_name"
+Проверить, что флаг private изменился на true
+Cleanup:
+
+Удалить тестовый файл test_update.json
+Удалить bin через DeleteBin
+Дополнительные проверки:
+Тест на обновление с невалидным ID
+Тест на обновление с пустым файлом
+Тест на обновление несуществующего bin
+🧪 Тест 4: Удаление bin (TestDeleteBin)
+Цель: Проверить, что функция DeleteBin корректно удаляет bin с сервера и из локального хранилища
+
+Шаги реализации:
+Arrange (Подготовка):
+
+Создать несколько тестовых bins (минимум 2):
+go
+api.CreateBin2(store, "test_data.json", false, "bin_to_delete_1")
+api.CreateBin2(store, "test_data.json", false, "bin_to_keep")
+Сохранить ID первого bin для удаления
+Сохранить начальное количество bins
+Act (Действие):
+
+Вызвать функцию удаления:
+go
+err := api.DeleteBin(binIdToDelete)
+Assert (Проверка):
+
+Проверить, что ошибки нет
+Загрузить данные из test_data.json
+Проверить, что количество bins уменьшилось на 1
+Проверить, что удаленного bin нет в списке
+Проверить, что второй bin остался нетронутым
+Попытаться получить удаленный bin через GetBin (должна вернуться ошибка)
+Cleanup:
+
+Удалить оставшийся bin через DeleteBin
+Дополнительные проверки:
+Тест на удаление с пустым ID (должна вернуться ошибка)
+Тест на удаление несуществующего bin
+Тест на удаление уже удаленного bin
+🔧 Вспомогательные функции
+1. setupTest(t *testing.T) *storage.Storage
+func setupTest(t *testing.T) *storage.Storage {
+    // Загрузить .env
+    err := godotenv.Load("../.env")
+    if err != nil {
+        t.Fatal("Не удалось загрузить .env файл")
+    }
+    
+    // Создать пустой Storage
+    store := storage.NewStorage([]bins.Bin{})
+    
+    // Сохранить в тестовый файл
+    err = store.Save("test_data.json")
+    if err != nil {
+        t.Fatal("Не удалось создать тестовый файл")
+    }
+    
+    return store
+}
+
+2. teardownTest(t *testing.T, binIds []string)
+func teardownTest(t *testing.T, binIds []string) {
+    // Удалить все созданные bins
+    for _, id := range binIds {
+        api.DeleteBin(id)
+    }
+    
+    // Удалить тестовый файл
+    os.Remove("test_data.json")
+    os.Remove("test_update.json")
+}
+
+3. createTestBin(t *testing.T, store *storage.Storage, name string) string
+func createTestBin(t *testing.T, store *storage.Storage, name string) string {
+    err := api.CreateBin2(store, "test_data.json", false, name)
+    if err != nil {
+        t.Fatalf("Не удалось создать тестовый bin: %v", err)
+    }
+    
+    // Вернуть ID последнего созданного bin
+    return store.Bins[len(store.Bins)-1].Id
+}
+
+📝 Пример структуры полного теста
+func TestCreateBin(t *testing.T) {
+    // Setup
+    store := setupTest(t)
+    createdBinIds := []string{}
+    defer teardownTest(t, createdBinIds)
+    
+    // Arrange
+    testName := "test_create_bin"
+    initialCount := len(store.Bins)
+    
+    // Act
+    err := api.CreateBin2(store, "test_data.json", false, testName)
+    
+    // Assert
+    if err != nil {
+        t.Errorf("Ожидалось nil, получено: %v", err)
+    }
+    
+    if len(store.Bins) != initialCount+1 {
+        t.Errorf("Ожидалось %d bins, получено %d", initialCount+1, len(store.Bins))
+    }
+    
+    lastBin := store.Bins[len(store.Bins)-1]
+    if lastBin.Name != testName {
+        t.Errorf("Ожидалось имя '%s', получено '%s'", testName, lastBin.Name)
+    }
+    
+    // Сохранить ID для cleanup
+    createdBinIds = append(createdBinIds, lastBin.Id)
+}
+
+⚠️ Важные замечания:
+Независимость тестов: Каждый тест должен создавать свои данные и не зависеть от других тестов
+Очистка ресурсов: Используйте defer для гарантированной очистки даже при падении теста
+API ключ: Убедитесь, что .env файл доступен из тестов (возможно, нужен путь ../.env)
+Сетевые запросы: Тесты будут делать реальные HTTP запросы к jsonbin.io - учитывайте лимиты API
+Параллельность: Не запускайте тесты параллельно (t.Parallel()), так как они работают с одним файлом
+🚀 Запуск тестов:
+# Запуск всех тестов
+go test ./api -v
+
+# Запуск конкретного теста
+go test ./api -v -run TestCreateBin
+
+# Запуск с покрытием
+go test ./api -v -cover
